@@ -15,7 +15,8 @@ def hmac_sha256(String secretKey, String data) {
 }
 
 def generate_signiture(String timestamp, String token){
-  String msg = timestamp as String + "::";
+  String msg = timestamp as String;
+  msg = msg + "::";
   def signatureBytes = hmac_sha256(token, msg);
   StringBuffer hexString = new StringBuffer();
   for (int j=0; j<signatureBytes.length; j++) {
@@ -26,10 +27,10 @@ def generate_signiture(String timestamp, String token){
   return hexString.toString();
 }
 
-withCredentials([usernamePassword(credentialsId: 'SIGNING_TOKEN', variable: 'SIGNING_TOKEN')]) {
+withCredentials([string(credentialsId: 'SIGNING_TOKEN', variable: 'SIGNING_TOKEN')]) {
   // the code here can access $SIGNING_TOKEN
   int timestamp = (new Date()).getTime()/1000 as int;
-  String encryptedSignature = generate_signiture(timestamp, $SIGNING_TOKEN)
+  String encryptedSignature = generate_signiture(timestamp as String, $SIGNING_TOKEN)
   println(encryptedSignature);
 
   def get = new URL("https://deployments.test.dpty.io/v1/deploy?id=deployment-test-us-west-2&type=ecs").openConnection();
