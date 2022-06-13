@@ -26,17 +26,21 @@ def generate_signiture(String timestamp, String token){
   return hexString.toString();
 }
 
-int timestamp = (new Date()).getTime()/1000 as int;
-String encryptedSignature = generate_signiture(timestamp, $SIGNING_TOKEN)
-println(encryptedSignature);
+withCredentials([usernamePassword(credentialsId: 'SIGNING_TOKEN', variable: 'SIGNING_TOKEN')]) {
+  // the code here can access $SIGNING_TOKEN
+  int timestamp = (new Date()).getTime()/1000 as int;
+  String encryptedSignature = generate_signiture(timestamp, $SIGNING_TOKEN)
+  println(encryptedSignature);
 
-def get = new URL("https://deployments.test.dpty.io/v1/deploy?id=deployment-test-us-west-2&type=ecs").openConnection();
-get.setRequestProperty("Host", "deployments.test.dpty.io");
-get.setRequestProperty("x-dpty-signature", encryptedSignature);
-get.setRequestProperty("x-dpty-signature-time", timestamp as String);
+  def get = new URL("https://deployments.test.dpty.io/v1/deploy?id=deployment-test-us-west-2&type=ecs").openConnection();
+  get.setRequestProperty("Host", "deployments.test.dpty.io");
+  get.setRequestProperty("x-dpty-signature", encryptedSignature);
+  get.setRequestProperty("x-dpty-signature-time", timestamp as String);
 
-def getRC = get.getResponseCode();
-println(getRC);
-if (getRC.equals(200)) {
-    println(get.getInputStream().getText());
+  def getRC = get.getResponseCode();
+  println(getRC);
+  if (getRC.equals(200)) {
+      println(get.getInputStream().getText());
+  }
+
 }
